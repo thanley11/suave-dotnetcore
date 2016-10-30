@@ -1,67 +1,54 @@
-﻿open Suave
-open Suave.Web
+
+open Suave
 open Suave.Http
 open Suave.Operators
-open Suave.Sockets.Control
-open Suave.WebSocket
-open Suave.Utils
+open Suave.Filters
+open Suave.Successful
 open Suave.Files
 open Suave.RequestErrors
-open Suave.Filters
+open Suave.Logging
+open Suave.Utils
+
 open System
 open System.Net
-open System.Threading
 
-type CmdArgs = { IP: System.Net.IPAddress; Port: Sockets.Port }
+open Suave.Sockets
+open Suave.Sockets.Control
+open Suave.WebSocket
 
-let defaultArgs = { IP = System.Net.IPAddress.Loopback; Port = 8083us }
-let logger = Logging.Loggers.ConsoleWindowLogger Logging.LogLevel.Verbose
-
-let refreshEvent = new Event<WebSocket>()
-
-let socketHandler (webSocket : WebSocket) =
+let echo (webSocket : WebSocket) =
   fun cx -> socket {
-    while true do
-      let! refreshed =
-        Control.Async.AwaitEvent(refreshEvent.Publish)
-        |> Suave.Sockets.SocketOp.ofAsync
-      do! webSocket.send Text (ASCII.bytes "refreshed") true
+    let loop = ref true
+    while !loop do
+      let! msg = webSocket.read()
+      match msg with
+      | (Text, data, true) ->
+        let str = UTF8.toString data
+        do! webSocket.send Text (ArraySegment data) true
+      | (Ping, _, _) ->
+        do! webSocket.send Pong (ArraySegment([||])) true
+      | (Close, _, _) ->
+        do! webSocket.send Close (ArraySegment([||])) true
+        loop := false
+      | _ -> ()
   }
-
-let webConfig = 
-    { defaultConfig with 
-        homeFolder = Some (__SOURCE_DIRECTORY__)
-        bindings=[ HttpBinding.mk HTTP defaultArgs.IP defaultArgs.Port ] 
-        logger = logger
-        listenTimeout = TimeSpan.FromMilliseconds 3000.
-    }
 
 let app : WebPart =
   choose [
-    Filters.log logger logFormat >=> never
-    Filters.path "/websocket" >=> handShake socketHandler
-    Filters.GET >=> Filters.path "/" >=> file "index.html"
+    path "/websocket" >=> handShake echo
+    GET >=> choose [ path "/" >=> file "index.html"; browseHome ];
     Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
       >=> Writers.setHeader "Pragma" "no-cache"
       >=> Writers.setHeader "Expires" "0"
       >=> browseHome
     NOT_FOUND "Found no handlers."
-  ]
+    ]
 
 [<EntryPoint>]
-let main argv = 
-    
-    let cts = new CancellationTokenSource()
-    (*let startingServer, shutdownServer = startWebServerAsync webConfig (Successful.OK "Hello World!")*)
-    let startingServer, shutdownServer = startWebServerAsync webConfig app
-
-    Async.Start(shutdownServer, cts.Token)
-
-    startingServer |> Async.RunSynchronously |> printfn "started: %A"
-
-    printfn "Press Enter to stop"
-    Console.Read() |> ignore
-
-    cts.Cancel()
-
-    0
+let main _ =
+  startWebServer { defaultConfig with 
+                        homeFolder = Some (__SOURCE_DIRECTORY__)
+                        logger = Targets.create Verbose
+                        listenTimeout = TimeSpan.FromMilliseconds 3000.
+                 } app
+  0
