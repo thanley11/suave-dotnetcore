@@ -1,0 +1,8 @@
+<textarea 
+  #noteText 
+  [style.top.px] = "top"
+  [style.left.px] = "left"
+  (draggable)="handleChangeNotePosition($event)"
+  (click)="handleChangeNoteText(noteText.value)" 
+  [ngClass] = "colour + '-note'">{{text}}</textarea>
+      <!--[disabled] = "disabled"-->

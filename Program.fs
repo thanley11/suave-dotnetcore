@@ -11,11 +11,13 @@ open Suave.Utils
 
 open System
 open System.Net
+open System.IO
 
 open Suave.Sockets
 open Suave.Sockets.Control
 open Suave.WebSocket
 
+let rootPath = Path.GetFullPath "app/dist"
 let echo (webSocket : WebSocket) =
   fun cx -> socket {
     let loop = ref true
@@ -33,22 +35,29 @@ let echo (webSocket : WebSocket) =
       | _ -> ()
   }
 
+let webConfig =
+    {
+        defaultConfig with 
+            homeFolder = Some rootPath
+            logger = Targets.create Verbose
+            listenTimeout = TimeSpan.FromMilliseconds 3000.
+    }
+
+let getFile name =
+    let rootPath = webConfig.homeFolder.Value
+    browseFile rootPath name
+
 let app : WebPart =
-  choose [
-    path "/websocket" >=> handShake echo
-    GET >=> choose [ path "/" >=> file "index.html"; browseHome ];
-    Writers.setHeader "Cache-Control" "no-cache, no-store, must-revalidate"
-      >=> Writers.setHeader "Pragma" "no-cache"
-      >=> Writers.setHeader "Expires" "0"
-      >=> browseHome
-    NOT_FOUND "Found no handlers."
+    choose [
+        path "/websocket" >=> handShake echo
+        GET >=> choose [
+            path "/" >=> Redirection.redirect "index.html"
+            pathScan "/%s" getFile 
+        ]
+        NOT_FOUND "Found no handlers" 
     ]
 
 [<EntryPoint>]
 let main _ =
-  startWebServer { defaultConfig with 
-                        homeFolder = Some (__SOURCE_DIRECTORY__)
-                        logger = Targets.create Verbose
-                        listenTimeout = TimeSpan.FromMilliseconds 3000.
-                 } app
+  startWebServer webConfig app
   0

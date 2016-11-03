@@ -1,0 +1,75 @@
+{
+  "notes": [
+    {
+      "id": 1,
+      "text": "Angular 2 Rocks!",
+      "colour": "red",
+      "left": 200,
+      "top": 100
+    },
+    {
+      "id": 2,
+      "text": "Thanks @robwormald & @MikeRyan52 for @ngrx.",
+      "colour": "blue",
+      "left": 482,
+      "top": 201,
+      "dirty": true
+    },
+    {
+      "id": 3,
+      "text": "And everybody from the angular, angular-cli, @ngrx/store and @ngrx/effects gitter.im channels who answered my stoopid questions.",
+      "colour": "yellow",
+      "left": 777,
+      "top": 78,
+      "dirty": true
+    },
+    {
+      "text": "dasdasdd",
+      "colour": "blue",
+      "left": 1123,
+      "top": 86,
+      "id": "96e72030-63c7-11e6-be39-096a013ee55e",
+      "dirty": true
+    },
+    {
+      "text": "",
+      "colour": "blue",
+      "left": 1065,
+      "top": 314,
+      "id": "448143b0-63c8-11e6-be39-096a013ee55e",
+      "dirty": true
+    },
+    {
+      "text": "",
+      "colour": "blue",
+      "left": 200,
+      "top": 100,
+      "id": "c0b91ad0-63d1-11e6-b281-9dce52ea433d",
+      "dirty": true
+    },
+    {
+      "text": "",
+      "colour": "green",
+      "left": 200,
+      "top": 100,
+      "id": "c1e05cc0-63d1-11e6-b281-9dce52ea433d",
+      "dirty": true
+    },
+    {
+      "text": "",
+      "colour": "red",
+      "left": 200,
+      "top": 100,
+      "id": "c235f6d0-63d1-11e6-b281-9dce52ea433d",
+      "dirty": true
+    },
+    {
+      "text": "",
+      "colour": "yellow",
+      "left": 200,
+      "top": 100,
+      "id": "c29b9670-63d1-11e6-b281-9dce52ea433d",
+      "dirty": true
+    }
+  ]
+}
