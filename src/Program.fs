@@ -17,7 +17,8 @@ open Suave.Sockets
 open Suave.Sockets.Control
 open Suave.WebSocket
 
-let rootPath = Path.GetFullPath "app/dist"
+let rootPath = Path.GetFullPath "."
+
 let echo (webSocket : WebSocket) =
   fun cx -> socket {
     let loop = ref true
@@ -40,6 +41,7 @@ let webConfig =
         defaultConfig with 
             homeFolder = Some rootPath
             logger = Targets.create Verbose
+            bindings=[ HttpBinding.createSimple HTTP "0.0.0.0" 8083 ] 
             listenTimeout = TimeSpan.FromMilliseconds 3000.
     }
 
