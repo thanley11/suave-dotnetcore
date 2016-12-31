@@ -1,12 +1,12 @@
 #To run
-dotnet restore
-
-dotnet build
-
+cd /app
 npm install
+ng build
 
-npm start
+cd ..
 
-#Notes
-Problem: Filebrowsehome not working with changed path?
-Can't find index unless moved to root
+docker build -t suave-dotnetcore .
+
+docker run --rm -it suave-dotnetcore
+
+
